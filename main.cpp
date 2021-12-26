@@ -13,13 +13,13 @@ string	itos(int val)
 	int	tempVal = val;
 	int	mul = 1;
 	
+	if (val == 0)
+		return	"0";
 	if (val < 0)
 	{
 		val *= -1;
 		resultStr += '-';
 	}
-	if (val == 0)
-		return	"0";
 	while (tempVal != 0)
 	{
 		tempVal /= 10;
@@ -69,8 +69,10 @@ int main(int argc, char* argv[])
 		operand2MaxDigitNum = atoi(argv[5]);
 	}
 
-	ifstream iFile;
-	ofstream oFile;
+	ifstream iFilePy;
+	ifstream iFileTxt;
+	ofstream oFilePy;
+	ofstream oFileTxt;
 	string	fileAddr = ".\\";
 	string	fileName;
 
@@ -83,12 +85,11 @@ int main(int argc, char* argv[])
 
 	fileName += itos(index);
 	fileAddr += itos(index++);
-	fileName += ".py";
-	fileAddr += ".py";
-	iFile.open(fileAddr, ios_base::in);
 
-	cout << iFile.is_open();
-	while (iFile.is_open() && index != 2147483648)
+	iFilePy.open(fileAddr + ".py", ios_base::in);
+	iFileTxt.open(fileAddr + ".txt", ios_base::in);
+
+	while (!iFilePy.fail() && !iFileTxt.fail() && index != 2147483648)
 	{
 		fileAddr.clear();
 		fileName.clear();
@@ -96,52 +97,67 @@ int main(int argc, char* argv[])
 		fileName += itos(index);
 		fileAddr += itos(index++);
 		fileAddr += ".py";
-		fileName += ".py";
 	}
-	oFile.open(fileName, ios_base::out);
-	if (oFile.is_open())
+	oFilePy.open(fileName + ".py", ios_base::out);
+	oFileTxt.open(fileName + ".txt", ios_base::out);
+	if (!oFilePy.fail() && !oFileTxt.fail())
 	{
 		for (int i = 0; i < syntaxNum; i++)
 		{
-			string	valStr = "print(";
+			string	pyStr = "print(";
+			string	syntaxStr;
 			bool	isNegative = disSign(gen3);
 
 			int	maxJ = disRange1(gen1);
 			int	tempVal = disVal(gen2);
 			if (isNegative)
-				valStr += '-';
+			{
+				pyStr += '-';
+				syntaxStr += '-';
+			}
 			while (tempVal == 0)
 				tempVal = disVal(gen2);
 			for (int j = 0; j < maxJ; j++)
 			{
-				valStr += tempVal + '0';
+				pyStr += tempVal + '0';
+				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
-			valStr += " * "; // * / % + -
+			pyStr += " + "; // * / % + -
+			syntaxStr += " + ";
 			maxJ = disRange2(gen1);
 			isNegative = disSign(gen3);
 			if (isNegative)
-				valStr += '-';
+			{
+				pyStr += '-';
+				syntaxStr += '-';
+			}
 			while (tempVal == 0)
 				tempVal = disVal(gen2);
 			for (int j = 0; j < maxJ; j++)
 			{
-				valStr += tempVal + '0';
+				pyStr += tempVal + '0';
+				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
-			valStr += ")\n";
-			oFile.write(valStr.c_str(), valStr.size());
+			pyStr += ")\n";
+			if(i < syntaxNum - 1)
+				syntaxStr += '\n';
+			oFilePy.write(pyStr.c_str(), pyStr.size());
+			oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
 
 			cout << "Making : " << i + 1 << " / " << syntaxNum << endl;
 		}
 
-		oFile.close();
+		oFilePy.close();
 	}
 	else
 		cout << "Error : Can't open file!" << endl;
-	
 
-	iFile.close();
+	iFilePy.close();
+	iFileTxt.close();
+	oFilePy.close();
+	oFileTxt.close();
 
 	return	0;
 }
