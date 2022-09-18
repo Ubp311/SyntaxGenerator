@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 	ifstream iFileTxt;
 	ofstream oFilePy;
 	ofstream oFileTxt;
-	string	fileAddr = ".\\";
+	string	fileAddr = "./"; // At Windows Using ".\\"
 
 	int	index = 1;
 
@@ -87,12 +87,12 @@ int main(int argc, char* argv[])
 	iFilePy.open(fileAddr + ".py", ios_base::in);
 	iFileTxt.open(fileAddr + ".txt", ios_base::in);
 
-	while (iFilePy.fail() && iFileTxt.fail() && index != 2147483648)
+	while (iFilePy.is_open() || iFileTxt.is_open() && index != 2147483648)
 	{
 		iFilePy.close();
 		iFileTxt.close();
 		fileAddr.clear();
-		fileAddr += ".\\";
+		fileAddr += "./"; // At Windows Using ".\\"
 		fileAddr += itos(index++);
 		iFilePy.open(fileAddr + ".py", ios_base::in);
 		iFileTxt.open(fileAddr + ".txt", ios_base::in);
@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 	if(index == 2147483648)
 	{
 		cout << "Index full." << endl;
+		iFilePy.close();
+		iFileTxt.close();
 		return	0;
 	}
 	oFilePy.open(fileAddr + ".py", ios_base::out);
