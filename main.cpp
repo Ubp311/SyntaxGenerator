@@ -89,6 +89,8 @@ int main(int argc, char* argv[])
 
 	while (iFilePy.fail() && iFileTxt.fail() && index != 2147483648)
 	{
+		iFilePy.close();
+		iFileTxt.close();
 		fileAddr.clear();
 		fileAddr += ".\\";
 		fileAddr += itos(index++);
@@ -150,8 +152,6 @@ int main(int argc, char* argv[])
 
 			cout << "Making : " << i + 1 << " / " << syntaxNum << endl;
 		}
-
-		oFilePy.close();
 	}
 	else
 		cout << "Error : Can't open file!" << endl;
