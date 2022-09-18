@@ -89,17 +89,22 @@ int main(int argc, char* argv[])
 	iFilePy.open(fileAddr + ".py", ios_base::in);
 	iFileTxt.open(fileAddr + ".txt", ios_base::in);
 
-	while (!iFilePy.fail() && !iFileTxt.fail() && index != 2147483648)
+	while (iFilePy.fail() && iFileTxt.fail() && index != 2147483648)
 	{
 		fileAddr.clear();
 		fileName.clear();
-		fileAddr += '.\\';
+		fileAddr += ".\\";
 		fileName += itos(index);
 		fileAddr += itos(index++);
 		fileAddr += ".py";
 	}
-	oFilePy.open(fileName + ".py", ios_base::out);
-	oFileTxt.open(fileName + ".txt", ios_base::out);
+	if(index == 2147483648)
+	{
+		cout << "Index full." << endl;
+		return	0;
+	}
+	oFilePy.open(fileAddr + ".py", ios_base::out);
+	oFileTxt.open(fileAddr + ".txt", ios_base::out);
 	if (!oFilePy.fail() && !oFileTxt.fail())
 	{
 		for (int i = 0; i < syntaxNum; i++)
