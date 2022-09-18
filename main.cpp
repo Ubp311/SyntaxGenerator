@@ -74,7 +74,6 @@ int main(int argc, char* argv[])
 	ofstream oFilePy;
 	ofstream oFileTxt;
 	string	fileAddr = ".\\";
-	string	fileName;
 
 	int	index = 1;
 
@@ -83,7 +82,6 @@ int main(int argc, char* argv[])
 	uniform_int_distribution<int>	disRange1(operand1MinDigitNum, operand1MaxDigitNum), disRange2(operand2MinDigitNum, operand2MaxDigitNum);
 	uniform_int_distribution<int> disVal(0, 9), disSign(0, 1);
 
-	fileName += itos(index);
 	fileAddr += itos(index++);
 
 	iFilePy.open(fileAddr + ".py", ios_base::in);
@@ -92,11 +90,10 @@ int main(int argc, char* argv[])
 	while (iFilePy.fail() && iFileTxt.fail() && index != 2147483648)
 	{
 		fileAddr.clear();
-		fileName.clear();
 		fileAddr += ".\\";
-		fileName += itos(index);
 		fileAddr += itos(index++);
-		fileAddr += ".py";
+		iFilePy.open(fileAddr + ".py", ios_base::in);
+		iFileTxt.open(fileAddr + ".txt", ios_base::in);
 	}
 	if(index == 2147483648)
 	{
