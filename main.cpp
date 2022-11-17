@@ -41,19 +41,38 @@ int main(int argc, char* argv[])
 	int	syntaxNum = 100;
 	int	operand1MinDigitNum = 8, operand1MaxDigitNum = 100;
 	int operand2MinDigitNum = 8, operand2MaxDigitNum = 100;
+	bool	isFirstAndSecondSame = false;
+	bool	isUnsigned = false;
+	char	flagChar = 'n';
 
 	if (argc == 1)
 	{
 		cout << "Input the number of syntax : ";
 		cin >> syntaxNum;
-		cout << "Input the first minimum digit : ";
-		cin >> operand1MinDigitNum;
-		cout << "Input the first maximum digit : ";
-		cin >> operand1MaxDigitNum;
-		cout << "Input the second minimum digit : ";
-		cin >> operand2MinDigitNum;
-		cout << "Input the second maximum digit : ";
-		cin >> operand2MaxDigitNum;
+		cout << "Make the first and second value the same length? (y/n) : ";
+		cin >> flagChar;
+		isFirstAndSecondSame = (flagChar == 'y') ? true : false;
+		cout << "Signed value? (y/n) : ";
+		cin >> flagChar;
+		isUnsigned = (flagChar == 'y') ? false : true;
+		if(!isFirstAndSecondSame)
+		{
+			cout << "Input the first minimum digit : ";
+			cin >> operand1MinDigitNum;
+			cout << "Input the first maximum digit : ";
+			cin >> operand1MaxDigitNum;
+			cout << "Input the second minimum digit : ";
+			cin >> operand2MinDigitNum;
+			cout << "Input the second maximum digit : ";
+			cin >> operand2MaxDigitNum;
+		}
+		else
+		{
+			cout << "Input the minimum digit : ";
+			cin >> operand1MinDigitNum;
+			cout << "Input the maximum digit : ";
+			cin >> operand1MaxDigitNum;
+		}
 	}
 	else if (argc < 6)
 	{
@@ -112,7 +131,9 @@ int main(int argc, char* argv[])
 		{
 			string	pyStr = "print(";
 			string	syntaxStr;
-			bool	isNegative = disSign(gen3);
+			bool	isNegative = false;
+			if(!isUnsigned)
+				isNegative = disSign(gen3);
 
 			int	maxJ = disRange1(gen1);
 			int	tempVal = disVal(gen2);
@@ -129,10 +150,14 @@ int main(int argc, char* argv[])
 				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
-			pyStr += " + "; // * / % + -
-			syntaxStr += " + ";
-			maxJ = disRange2(gen1);
-			isNegative = disSign(gen3);
+			pyStr += " * "; // * / % + -
+			syntaxStr += " * ";
+			if(!isFirstAndSecondSame)
+			{
+				maxJ = disRange2(gen1);
+				if(!isUnsigned)
+					isNegative = disSign(gen3);
+			}
 			if (isNegative)
 			{
 				pyStr += '-';
