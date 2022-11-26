@@ -36,12 +36,67 @@ string	itos(int val)
 	return	resultStr;
 };
 
+int flag(const string& str, bool& isSameLength, bool& isUnsigned)
+{
+	if(str == "-sl" && !isSameLength)
+	{
+		isSameLength = true;
+		return	1;
+	}
+	else if(str == "-u" && !isUnsigned)
+	{
+		isUnsigned = true;
+		return	1;
+	}
+	else
+		return	0;
+};
+
+bool	flagError(const string& str)
+{
+	if(!str.compare("-sl") || !str.compare("-u"))
+		return	false;
+	else
+	{
+		for(int i = 0; i != '\0'; i++)
+		{
+			if(!isdigit(str[i]))
+			{
+				cout <<	"Error." << endl;
+				return	true;
+			}
+		}
+		return	false;
+	}
+};
+
+bool	charError(const char& c)
+{
+	switch (c)
+	{
+	case '*':
+		return	false;
+	case '/':
+		return	false;
+	case '%':
+		return	false;
+	case '+':
+		return	false;
+	case '-':
+		return	false; 
+	default:
+		cout << "Error : Unknown character." << endl;
+		return	true;
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	int	syntaxNum = 100;
 	int	operand1MinDigitNum = 8, operand1MaxDigitNum = 100;
 	int operand2MinDigitNum = 8, operand2MaxDigitNum = 100;
-	bool	isFirstAndSecondSame = false;
+	char	opChar = '+';
+	bool	isSameLength = false;
 	bool	isUnsigned = false;
 	char	flagChar = 'n';
 
@@ -49,13 +104,20 @@ int main(int argc, char* argv[])
 	{
 		cout << "Input the number of syntax : ";
 		cin >> syntaxNum;
+		cout << "Input the operator('*','/','+','-') : ";
+		cin >> opChar;
+		if(charError(opChar))
+		{
+			cout << "Error : Unknown operator." << endl;
+			return	0;
+		}
 		cout << "Make the first and second value the same length? (y/n) : ";
 		cin >> flagChar;
-		isFirstAndSecondSame = (flagChar == 'y') ? true : false;
+		isSameLength = (flagChar == 'y') ? true : false;
 		cout << "Signed value? (y/n) : ";
 		cin >> flagChar;
 		isUnsigned = (flagChar == 'y') ? false : true;
-		if(!isFirstAndSecondSame)
+		if(!isSameLength)
 		{
 			cout << "Input the first minimum digit : ";
 			cin >> operand1MinDigitNum;
@@ -74,18 +136,69 @@ int main(int argc, char* argv[])
 			cin >> operand1MaxDigitNum;
 		}
 	}
-	else if (argc < 6)
+	else if (argc < 7)
 	{
 		cout << "Error : Lack of parameters." << endl;
 		return	0;
 	}
-	else if (argc == 6)
+	else if (argc >= 7)
 	{
-		syntaxNum = atoi(argv[1]);
-		operand1MinDigitNum = atoi(argv[2]);
-		operand1MaxDigitNum = atoi(argv[3]);
-		operand2MinDigitNum = atoi(argv[4]);
-		operand2MaxDigitNum = atoi(argv[5]);
+		int	i = 1;
+		
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		syntaxNum = atoi(argv[i++]);
+		if(flagError(argv[i]) || charError(argv[i][0]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		opChar = argv[i++][0];
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		operand1MinDigitNum = atoi(argv[i++]);
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		operand1MaxDigitNum = atoi(argv[i++]);
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		operand2MinDigitNum = atoi(argv[i++]);
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		i += flag(argv[i], isSameLength, isUnsigned);
+		if(flagError(argv[i]))
+			return	0;
+		operand2MaxDigitNum = atoi(argv[i++]);
+		if(i < argc)
+		{
+			if(flagError(argv[i]))
+				return	0;
+			i += flag(argv[i], isSameLength, isUnsigned);
+		}
+		if(i < argc)
+		{
+			if(flagError(argv[i]))
+				return	0;
+			i += flag(argv[i], isSameLength, isUnsigned);
+		}
 	}
 
 	ifstream iFilePy;
@@ -134,7 +247,6 @@ int main(int argc, char* argv[])
 			bool	isNegative = false;
 			if(!isUnsigned)
 				isNegative = disSign(gen3);
-
 			int	maxJ = disRange1(gen1);
 			int	tempVal = disVal(gen2);
 			if (isNegative)
@@ -150,9 +262,13 @@ int main(int argc, char* argv[])
 				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
-			pyStr += " * "; // * / % + -
-			syntaxStr += " * ";
-			if(!isFirstAndSecondSame)
+			pyStr += ' '; // * / % + -
+			pyStr += opChar;
+			pyStr += ' ';
+			syntaxStr += ' ';
+			syntaxStr += opChar;
+			syntaxStr += ' ';
+			if(!isSameLength)
 			{
 				maxJ = disRange2(gen1);
 				if(!isUnsigned)
@@ -177,7 +293,7 @@ int main(int argc, char* argv[])
 			oFilePy.write(pyStr.c_str(), pyStr.size());
 			oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
 
-			cout << "Making : " << i + 1 << " / " << syntaxNum << endl;
+			cout << "Generating : " << i + 1 << " / " << syntaxNum << endl;
 		}
 	}
 	else
