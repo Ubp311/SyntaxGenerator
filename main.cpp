@@ -90,6 +90,53 @@ bool	charError(const char& c)
 	}
 };
 
+const string	bigIntDivisionStr = "def bigIntDivision(val1, val2):\n"
+	"\tremainder = 0\n"
+	"\ttempRemainder = 0\n"
+    "\tvalStr1Length = len(str(val1))\n"
+    "\tvalStr2Length = len(str(val2))\n"
+    "\tresultStr = ''\n"
+	"\tif valStr1Length > 1 or valStr2Length > 1:\n"
+    "\t\tif valStr1Length < valStr2Length:\n"
+    "\t\t\treturn  0\n"
+    "\t\telse:\n"
+	"\t\t\tqEst = 5\n"
+	"\t\t\ttempQEst = 5\n"
+    "\t\t\ttempRemainder = remainder = int(str(val1)[0: valStr2Length])\n"
+    "\t\t\tfor i in range(valStr2Length, valStr1Length):\n"
+    "\t\t\t\tqEst = 0\n"
+    "\t\t\t\ttempQEst = 5\n"
+    "\t\t\t\twhile tempRemainder >= val2 or tempRemainder < 0:\n"
+    "\t\t\t\t\tif tempRemainder < 0:\n"
+	"\t\t\t\t\t\tqEst -= tempQEst\n"
+    "\t\t\t\t\telif tempRemainder >= val2:\n"
+    "\t\t\t\t\t\tqEst += tempQEst\n"
+    "\t\t\t\t\ttempRemainder = remainder - val2 * qEst\n"
+    "\t\t\t\t\tif tempQEst != 1:\n"
+    "\t\t\t\t\t\ttempQEst = int(tempQEst / 2)\n"
+    "\t\t\t\tresultStr += str(qEst)\n"
+    "\t\t\t\ttempRemainder *= 10\n"
+    "\t\t\t\ttempRemainder += int(str(val1)[i])\n"
+	"\t\t\t\tremainder = tempRemainder\n"
+	"\t\t\tqEst = 0\n"
+	"\t\t\ttempQEst = 5\n"
+    "\t\t\twhile tempRemainder >= val2 or tempRemainder < 0:\n"
+    "\t\t\t\tif tempRemainder < 0:\n"
+    "\t\t\t\t\tqEst -= tempQEst\n"
+    "\t\t\t\telif tempRemainder >= val2:\n"
+    "\t\t\t\t\tqEst += tempQEst\n"
+    "\t\t\t\ttempRemainder = remainder - val2 * qEst\n"
+    "\t\t\t\tif tempQEst != 1:\n"
+    "\t\t\t\t\ttempQEst = int(tempQEst / 2)\n"
+	"\t\t\tresultStr += str(qEst)\n"
+	"\t\t\treturn  int(resultStr)\n"
+	"\treturn	int(val1 / val2)\n\n";
+const string	bigIntMultiplyStr = "def bigIntMultiply(val1, val2):\n"
+	"\tqEst = bigIntDivision(val1, val2)\n"
+	"\tif val1 > val2 * qEst and val1 < val2 * (qEst + 1) or val1 == val2 * qEst:\n"
+	"\t\treturn	True\n"
+	"\treturn	False\n\n";
+
 int main(int argc, char* argv[])
 {
 	int	syntaxNum = 100;
@@ -109,7 +156,7 @@ int main(int argc, char* argv[])
 		if(charError(opChar))
 		{
 			cout << "Error : Unknown operator." << endl;
-			return	0;
+			return	1;
 		}
 		cout << "Make the first and second value the same length? (y/n) : ";
 		cin >> flagChar;
@@ -138,65 +185,66 @@ int main(int argc, char* argv[])
 	}
 	else if (argc < 7)
 	{
-		cout << "Error : Lack of parameters." << endl;
-		return	0;
+		cout << "Usage : ./main {SyntaxNum} {-sl : Both value length are same.} {-u : unsigned value.}" << endl;
+		cout << "{opChar} {operand1MinDigitNum} {operand1MaxDigitNum} {operand2MinDigitNum} {operand2MaxDigitNum}" << endl;
+		return	1;
 	}
 	else if (argc >= 7)
 	{
 		int	i = 1;
 		
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		syntaxNum = atoi(argv[i++]);
 		if(flagError(argv[i]) || charError(argv[i][0]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		opChar = argv[i++][0];
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		operand1MinDigitNum = atoi(argv[i++]);
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		operand1MaxDigitNum = atoi(argv[i++]);
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		operand2MinDigitNum = atoi(argv[i++]);
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		i += flag(argv[i], isSameLength, isUnsigned);
 		if(flagError(argv[i]))
-			return	0;
+			return	1;
 		operand2MaxDigitNum = atoi(argv[i++]);
 		if(i < argc)
 		{
 			if(flagError(argv[i]))
-				return	0;
+				return	1;
 			i += flag(argv[i], isSameLength, isUnsigned);
 		}
 		if(i < argc)
 		{
 			if(flagError(argv[i]))
-				return	0;
+				return	1;
 			i += flag(argv[i], isSameLength, isUnsigned);
 		}
 	}
@@ -218,7 +266,6 @@ int main(int argc, char* argv[])
 
 	iFilePy.open(fileAddr + ".py", ios_base::in);
 	iFileTxt.open(fileAddr + ".txt", ios_base::in);
-
 	while (iFilePy.is_open() || iFileTxt.is_open() && index != 2147483648)
 	{
 		iFilePy.close();
@@ -234,17 +281,21 @@ int main(int argc, char* argv[])
 		cout << "Index full." << endl;
 		iFilePy.close();
 		iFileTxt.close();
-		return	0;
+		return	2;
 	}
 	oFilePy.open(fileAddr + ".py", ios_base::out);
 	oFileTxt.open(fileAddr + ".txt", ios_base::out);
 	if (!oFilePy.fail() && !oFileTxt.fail())
 	{
+		oFilePy.write(bigIntDivisionStr.c_str(), bigIntDivisionStr.size());
+		oFilePy.write(bigIntMultiplyStr.c_str(), bigIntMultiplyStr.size());
 		for (int i = 0; i < syntaxNum; i++)
 		{
 			string	pyStr = "print(";
 			string	syntaxStr;
 			bool	isNegative = false;
+			if(opChar == '/')
+				pyStr += "bigIntDivision(";
 			if(!isUnsigned)
 				isNegative = disSign(gen3);
 			int	maxJ = disRange1(gen1);
@@ -262,8 +313,13 @@ int main(int argc, char* argv[])
 				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
-			pyStr += ' '; // * / % + -
-			pyStr += opChar;
+			if(opChar == '/')
+				pyStr += ",";
+			else
+			{
+				pyStr += ' '; // * / % + -
+				pyStr += opChar;
+			}
 			pyStr += ' ';
 			syntaxStr += ' ';
 			syntaxStr += opChar;
@@ -287,6 +343,8 @@ int main(int argc, char* argv[])
 				syntaxStr += tempVal + '0';
 				tempVal = disVal(gen2);
 			}
+			if(opChar == '/')
+				pyStr += ')';
 			pyStr += ")\n";
 			if(i < syntaxNum - 1)
 				syntaxStr += '\n';
