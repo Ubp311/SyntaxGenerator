@@ -178,7 +178,7 @@ const string	randomIndicesDecodeStr = "def randomIndicesDecode(vals, s, e):\n"
 	"\telif s >= len(vals) and e >= len(vals):\n"
 	"\t\treturn 0\n"
 	"\tfor i in range(s, e + 1):\n"
-	"\t\tresult += (2 ** 32) ** i * vals[i]\n"
+	"\t\tresult += (2 ** 32) ** (i - s) * vals[i]\n"
 	"\treturn	result\n\n";
 
 int main(int argc, char* argv[])
@@ -357,10 +357,9 @@ int main(int argc, char* argv[])
 			bool	isNegative = false;
 
 			if(flags[2])
-			{
 				isNegative = disSign(gen3);
+			if(opChar == '-')
 				pyStr += "abs(";
-			}
 			if (isNegative)
 			{
 				pyStr += '-';
@@ -454,6 +453,8 @@ int main(int argc, char* argv[])
 				syntaxStr += tempStr;
 			}
 			if(flags[2])
+				pyStr += ')';
+			if(opChar == '-')
 				pyStr += ')';
 			pyStr += ")\n";
 			if(i < syntaxNum - 1)
