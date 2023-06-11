@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
 				isNegative = disSign(gen3);
 			if (flags[0])
 			{
-				
+				tempStr.clear();				
 				if (!flags[1])
 					maxJ = disRange2(gen1);
 				if (isNegative)
@@ -423,10 +423,11 @@ int main(int argc, char* argv[])
 					tempVal = disVal(gen2);
 				for (int j = 0; j < maxJ; j++)
 				{
-					pyStr += tempVal + '0';
-					syntaxStr += tempVal + '0';
+					tempStr += tempVal + '0';
 					tempVal = disVal(gen2);
 				}
+				pyStr += tempStr;
+				syntaxStr += tempStr;
 				if(flags[3])
 				{
 					pyStr += ')';
@@ -446,8 +447,6 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				string	tempStr;
-
 				tempStr = uitous(disIndex(rd4));
 				pyStr += tempStr;
 				syntaxStr += tempStr;
