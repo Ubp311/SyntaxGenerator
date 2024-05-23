@@ -577,35 +577,43 @@ int main(int argc, char* argv[])
 				}
 				syntax2Str = tempStr;
 
-				pyStr += "\nprint(";
-				if(flags[3])
+				if (!(opStr.compare("*") || opStr.compare("/") || opStr.compare("%") || opStr.compare("+") || (opStr.compare("-"))))
 				{
-					if(!opStr.compare("-") || !opStr.compare("-="))
-						pyStr += "abs(";
-					pyStr += 'a';
-					syntaxStr += '(' + syntax1Str;
-					syntaxStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
-				}
-				else
-				{
-					syntaxStr += syntax1Str;
-					pyStr += 'a';
-				}
-				pyStr += ' ' + opStr + ' ';
-				syntaxStr += ' ' + opStr + ' ';
-				pyStr += "b";
-				if (flags[0])
-				{
+					pyStr += "\nprint(";
 					if (flags[3])
 					{
-						syntaxStr += '(' + syntax2Str;
-						syntaxStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+						if (!opStr.compare("-") || !opStr.compare("-="))
+							pyStr += "abs(";
+						pyStr += 'a';
+						syntaxStr += '(' + syntax1Str;
+						syntaxStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
+					}
+					else
+					{
+						syntaxStr += syntax1Str;
+						pyStr += 'a';
+					}
+					pyStr += ' ' + opStr + ' ';
+					syntaxStr += ' ' + opStr + ' ';
+					pyStr += "b";
+					if (flags[0])
+					{
+						if (flags[3])
+						{
+							syntaxStr += '(' + syntax2Str;
+							syntaxStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+						}
+						else
+							syntaxStr += syntax2Str;
 					}
 					else
 						syntaxStr += syntax2Str;
 				}
 				else
-					syntaxStr += syntax2Str;
+				{
+					
+				}
+
 				if (!opStr.compare("-") || !opStr.compare("-="))
 					pyStr += ')';
 				pyStr += ")\n";
