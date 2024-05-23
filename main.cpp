@@ -98,24 +98,22 @@ bool	flagError(const string& str)
 	}
 };
 
-bool	charError(const char& c)
+bool	charError(const string& str)
 {
-	switch (c)
-	{
-	case '*':
-		return	false;
-	case '/':
-		return	false;
-	case '%':
-		return	false;
-	case '+':
-		return	false;
-	case '-':
-		return	false; 
-	default:
-		cout << "Error : Unknown character." << endl;
-		return	true;
-	}
+	bool	result = false;
+
+	result |= str.compare("*");
+	result |= str.compare("/");
+	result |= str.compare("%");
+	result |= str.compare("+");
+	result |= str.compare("-");
+	result |= str.compare("*=");
+	result |= str.compare("/=");
+	result |= str.compare("%=");
+	result |= str.compare("+=");
+	result |= str.compare("-=");
+
+	return	!result;
 };
 
 /*const string	bigIntDivisionStr = "def bigIntDivision(val1, val2):\n"
@@ -186,7 +184,8 @@ int main(int argc, char* argv[])
 	int	syntaxNum = 100;
 	int	operand1MinDigitNum = 8, operand1MaxDigitNum = 100;
 	int operand2MinDigitNum = 8, operand2MaxDigitNum = 100;
-	char	opChar = '+';
+	unsigned int	start = 0, end = -1;
+	string	opStr = "*";
 	bool	flags[4] = {false, false, false, false}; // array by value, sameLength, unsigned, random indices
 	char	flagChar = 'n';
 
@@ -194,9 +193,9 @@ int main(int argc, char* argv[])
 	{
 		cout << "Input the number of syntax : ";
 		cin >> syntaxNum;
-		cout << "Input the operator('*','/','+','-') : ";
-		cin >> opChar;
-		if(charError(opChar))
+		cout << "Input the operator('*','/','%','+','-','*=','/=','%=','+=','-=') : ";
+		cin >> opStr;
+		if(charError(opStr))
 		{
 			cout << "Error : Unknown operator." << endl;
 			return	1;
@@ -237,6 +236,13 @@ int main(int argc, char* argv[])
 			cout << "Input the maximum digit : ";
 			cin >> operand1MaxDigitNum;
 		}
+		if(flags[3])
+		{
+			cout << "Input the starting range : ";
+			cin >> start;
+			cout << "Input the end range : ";
+			cin >> end;
+		}
 	}
 	else if (argc < 7)
 	{
@@ -255,13 +261,13 @@ int main(int argc, char* argv[])
 			return	1;
 		i += flag(argv[i], flags);
 		syntaxNum = atoi(argv[i++]);
-		if(flagError(argv[i]) || charError(argv[i][0]))
+		if(flagError(argv[i]) || charError(argv[i]))
 			return	1;
 		i += flag(argv[i], flags);
 		if(flagError(argv[i]))
 			return	1;
 		i += flag(argv[i], flags);
-		opChar = argv[i++][0];
+		opStr = argv[i++];
 		if(flagError(argv[i]))
 			return	1;
 		i += flag(argv[i], flags);
@@ -345,76 +351,29 @@ int main(int argc, char* argv[])
 	{
 		oFilePy.write(encodeStr.c_str(), encodeStr.size());
 		oFilePy.write(randomIndicesDecodeStr.c_str(), randomIndicesDecodeStr.size());
-		if(!flags[0])
+		if (!flags[0])
 			oFileTxt.write("v\n", 2);
-		for (int i = 0; i < syntaxNum; i++)
+		/*if (!(opStr.compare("*") || opStr.compare("/") || opStr.compare("%") || opStr.compare("+") || opStr.compare("-")))
 		{
-			string	pyStr = "print(";
-			string	syntaxStr;
-			string	tempStr;
-			int	maxJ = disRange1(gen1);
-			int	tempVal = disVal(gen2);
-			bool	isNegative = false;
+			for (int i = 0; i < syntaxNum; i++)
+			{
+				string pyStr = "print(";
+				string syntaxStr;
+				string tempStr;
+				int maxJ = disRange1(gen1);
+				int tempVal = disVal(gen2);
+				bool isNegative = false;
 
-			if(flags[2])
-				isNegative = disSign(gen3);
-			if(opChar == '-')
-				pyStr += "abs(";
-			if (isNegative)
-			{
-				pyStr += '-';
-				syntaxStr += '-';
-			}
-			if(flags[3])
-			{
-				pyStr += "randomIndicesDecode(encode(";
-				syntaxStr += '(';
-			}
-			while (tempVal == 0)
-				tempVal = disVal(gen2);
-			for (int j = 0; j < maxJ; j++)
-			{
-				tempStr += tempVal + '0';
-				tempVal = disVal(gen2);
-			}
-			pyStr += tempStr;
-			syntaxStr += tempStr;
-			if(flags[3])
-			{
-				pyStr += ')';
-				size_t maxIndex = (unsigned long long)(log2(10.0) * tempStr.size() + 2) >> 5;
-
-				uniform_int_distribution<unsigned int>	disIndex(0, maxIndex);
-				size_t	s, e;
-
-				s = disIndex(rd4);
-				e = disIndex(rd4);
-				if(s > e)
-					swap(s, e);
-				pyStr += ", " + uitous(s) + ", " + uitous(e) + ')';
-				syntaxStr += ", " + uitous(s) + ", " + uitous(e) + ')';
-			}
-			pyStr += ' ';
-			if (opChar == '/')
-				pyStr += opChar;
-			pyStr += opChar;
-			pyStr += ' ';
-			syntaxStr += ' ';
-			syntaxStr += opChar; // * / % + -
-			syntaxStr += ' ';
-			if (flags[2])
-				isNegative = disSign(gen3);
-			if (flags[0])
-			{
-				tempStr.clear();				
-				if (!flags[1])
-					maxJ = disRange2(gen1);
+				if (flags[2])
+					isNegative = disSign(gen3);
+				if (!opStr.compare("-"))
+					pyStr += "abs(";
 				if (isNegative)
 				{
 					pyStr += '-';
 					syntaxStr += '-';
 				}
-				if(flags[3])
+				if (flags[3])
 				{
 					pyStr += "randomIndicesDecode(encode(";
 					syntaxStr += '(';
@@ -428,14 +387,13 @@ int main(int argc, char* argv[])
 				}
 				pyStr += tempStr;
 				syntaxStr += tempStr;
-				if(flags[3])
+				if (flags[3])
 				{
 					pyStr += ')';
+					// size_t maxIndex = (unsigned long long)(log2(10.0) * tempStr.size() + 2) >> 5;
 
-					size_t maxIndex = (unsigned long long)(log2(10.0) * tempStr.size() + 2) >> 5;
-
-					uniform_int_distribution<unsigned int> disIndex(0, maxIndex);
-					size_t s, e;
+					/*uniform_int_distribution<unsigned int>	disIndex(start, end);
+					size_t	s, e;
 
 					s = disIndex(rd4);
 					e = disIndex(rd4);
@@ -443,26 +401,224 @@ int main(int argc, char* argv[])
 						swap(s, e);
 					pyStr += ", " + uitous(s) + ", " + uitous(e) + ')';
 					syntaxStr += ", " + uitous(s) + ", " + uitous(e) + ')';
-				}
-			}
-			else
-			{
-				tempStr = uitous(disIndex(rd4));
-				pyStr += tempStr;
-				syntaxStr += tempStr;
-			}
-			if(flags[2])
-				pyStr += ')';
-			if(opChar == '-')
-				pyStr += ')';
-			pyStr += ")\n";
-			if(i < syntaxNum - 1)
-				syntaxStr += '\n';
-			oFilePy.write(pyStr.c_str(), pyStr.size());
-			oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
 
-			cout << "Generating : " << i + 1 << " / " << syntaxNum << endl;
+					double size = log2(10.0) * (maxJ - 1);
+					uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
+					size_t s, e;
+
+					s = disStartIndex(rd4);
+
+					uniform_int_distribution<unsigned int> disEndIndex(s, end);
+					e = disEndIndex(rd4);
+					if (s > e)
+						swap(s, e);
+					pyStr += ", " + uitous(s) + ", " + uitous(e) + ')';
+					syntaxStr += ", " + uitous(s) + ", " + uitous(e) + ')';
+				}
+				pyStr += ' ';
+				if (!opStr.compare("/"))
+					pyStr += opStr;
+				pyStr += opStr;
+				pyStr += ' ';
+				syntaxStr += ' ';
+				syntaxStr += opStr; // * / % + -
+				syntaxStr += ' ';
+				if (flags[2])
+					isNegative = disSign(gen3);
+				if (flags[0])
+				{
+					tempStr.clear();
+					if (!flags[1])
+						maxJ = disRange2(gen1);
+					if (isNegative)
+					{
+						pyStr += '-';
+						syntaxStr += '-';
+					}
+					if (flags[3])
+					{
+						pyStr += "randomIndicesDecode(encode(";
+						syntaxStr += '(';
+					}
+					while (tempVal == 0)
+						tempVal = disVal(gen2);
+					for (int j = 0; j < maxJ; j++)
+					{
+						tempStr += tempVal + '0';
+						tempVal = disVal(gen2);
+					}
+					pyStr += tempStr;
+					syntaxStr += tempStr;
+					if (flags[3])
+					{
+						pyStr += ')';
+
+						double size = log2(10.0) * (maxJ - 1);
+
+						uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5);
+						size_t s, e;
+
+						s = disStartIndex(rd4);
+
+						uniform_int_distribution<unsigned int> disEndIndex((unsigned int)size >> 5, end);
+						e = disEndIndex(rd4);
+						if (s > e)
+							swap(s, e);
+						pyStr += ", " + uitous(s) + ", " + uitous(e) + ')';
+						syntaxStr += ", " + uitous(s) + ", " + uitous(e) + ')';
+					}
+				}
+				else
+				{
+					tempStr = uitous(disIndex(rd4));
+					pyStr += tempStr;
+					syntaxStr += tempStr;
+				}
+				if (flags[2])
+					pyStr += ')';
+				if (!opStr.compare("-"))
+					pyStr += ')';
+				pyStr += ")\n";
+				if (i < syntaxNum - 1)
+					syntaxStr += '\n';
+
+				oFilePy.write(pyStr.c_str(), pyStr.size());
+				oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
+
+				cout << "Generating : " << i + 1 << " / " << syntaxNum << endl;
+			}
 		}
+		else*/
+		//{
+			for(int i = 0; i < syntaxNum; i++)
+			{
+				string pyStr = "a = ";
+				string syntaxStr, syntax1Str, syntax2Str;
+				string tempStr;
+
+				int	maxJA = disRange1(gen1);
+				int	tempVal = disVal(gen2);
+				bool	isNegative = false;
+
+				double	size;
+				size_t	s1, e1, s2, e2;
+
+				if(flags[2])
+					isNegative = disSign(gen3);
+				if(isNegative)
+					pyStr += '-';
+				if(flags[3])
+					pyStr += "randomIndicesDecode(";
+				while (tempVal == 0)
+					tempVal = disVal(gen2);
+				for (int j = 0; j < maxJA; j++)
+				{
+					tempStr += tempVal + '0';
+					tempVal = disVal(gen2);
+				}
+				pyStr += tempStr;
+				if(flags[3])
+				{
+					size = log2(10.0) * (maxJA - 1);
+
+					uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
+
+					s1 = disStartIndex(rd4);
+
+					uniform_int_distribution<unsigned int> disEndIndex(s1, end);
+					e1 = disEndIndex(rd4);
+					
+					pyStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
+				}
+				syntax1Str = tempStr;
+
+				pyStr += "\nb = ";
+
+				int	maxJB = disRange1(gen1);
+				tempStr = "";
+				tempVal = disVal(gen2);
+				if(flags[2])
+					isNegative = disSign(gen3);
+				if(isNegative)
+					pyStr += '-';
+				if(flags[0])
+				{
+					if(flags[3])
+						pyStr += "randomIndicesDecode(";
+				}
+				if (flags[0])
+				{
+					while (tempVal == 0)
+						tempVal = disVal(gen2);
+					for (int j = 0; j < maxJB; j++)
+					{
+						tempStr += tempVal + '0';
+						tempVal = disVal(gen2);
+					}
+					pyStr += tempStr;
+					if (flags[3])
+					{
+						size = log2(10.0) * (maxJB - 1);
+
+						uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
+
+						s2 = disStartIndex(rd4);
+
+						uniform_int_distribution<unsigned int> disEndIndex(s2, end);
+						e2 = disEndIndex(rd4);
+
+						pyStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+					}
+				}
+				else
+				{
+					tempStr = uitous(disIndex(rd4));
+					pyStr += tempStr;
+				}
+				syntax2Str = tempStr;
+
+				pyStr += "\nprint(";
+				if(flags[3])
+				{
+					if(!opStr.compare("-") || !opStr.compare("-="))
+						pyStr += "abs(";
+					pyStr += 'a';
+					syntaxStr += '(' + syntax1Str;
+					syntaxStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
+				}
+				else
+				{
+					syntaxStr += syntax1Str;
+					pyStr += 'a';
+				}
+				pyStr += ' ' + opStr + ' ';
+				syntaxStr += ' ' + opStr + ' ';
+				pyStr += "b";
+				if (flags[0])
+				{
+					if (flags[3])
+					{
+						syntaxStr += '(' + syntax2Str;
+						syntaxStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+					}
+					else
+						syntaxStr += syntax2Str;
+				}
+				else
+					syntaxStr += syntax2Str;
+				if (!opStr.compare("-") || !opStr.compare("-="))
+					pyStr += ')';
+				pyStr += ")\n";
+				if (i < syntaxNum - 1)
+					syntaxStr += '\n';
+
+				oFilePy.write(pyStr.c_str(), pyStr.size());
+				oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
+
+				cout << "Generating : " << i + 1 << " / " << syntaxNum << endl;
+			}
+		//}
+		
 	}
 	else
 		cout << "Error : Can't open file!" << endl;
