@@ -185,6 +185,7 @@ int main(int argc, char* argv[])
 	int	operand1MinDigitNum = 8, operand1MaxDigitNum = 100;
 	int operand2MinDigitNum = 8, operand2MaxDigitNum = 100;
 	unsigned int	start = 0, end = -1;
+	size_t	sizeDiff;
 	string	opStr = "*";
 	bool	flags[4] = {false, false, false, false}; // array by value, sameLength, unsigned, random indices
 	char	flagChar = 'n';
@@ -505,10 +506,21 @@ int main(int argc, char* argv[])
 
 				if(flags[2])
 					isNegative = disSign(gen3);
-				if(isNegative)
+				if (isNegative)
 					pyStr += '-';
-				if(flags[3])
-					pyStr += "randomIndicesDecode(";
+				if (flags[3])
+				{
+					pyStr += "randomIndicesDecode(encode(";
+
+					size = log2(10.0) * (maxJA - 1);
+
+					uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
+
+					s1 = disStartIndex(rd4);
+
+					uniform_int_distribution<unsigned int> disEndIndex(s1, end);
+					e1 = disEndIndex(rd4);
+				}
 				while (tempVal == 0)
 					tempVal = disVal(gen2);
 				for (int j = 0; j < maxJA; j++)
@@ -519,15 +531,7 @@ int main(int argc, char* argv[])
 				pyStr += tempStr;
 				if(flags[3])
 				{
-					size = log2(10.0) * (maxJA - 1);
-
-					uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
-
-					s1 = disStartIndex(rd4);
-
-					uniform_int_distribution<unsigned int> disEndIndex(s1, end);
-					e1 = disEndIndex(rd4);
-					
+					pyStr += ')';
 					pyStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
 				}
 				syntax1Str = tempStr;
@@ -544,7 +548,7 @@ int main(int argc, char* argv[])
 				if(flags[0])
 				{
 					if(flags[3])
-						pyStr += "randomIndicesDecode(";
+						pyStr += "randomIndicesDecode(encode(";
 				}
 				if (flags[0])
 				{
@@ -558,16 +562,19 @@ int main(int argc, char* argv[])
 					pyStr += tempStr;
 					if (flags[3])
 					{
+						pyStr += ')';
 						size = log2(10.0) * (maxJB - 1);
 
-						uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
+						uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= e1 ? e1 : (unsigned int)size >> 5);
 
 						s2 = disStartIndex(rd4);
 
 						uniform_int_distribution<unsigned int> disEndIndex(s2, end);
 						e2 = disEndIndex(rd4);
 
-						pyStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+						sizeDiff = min(e2 - s2, e1 - s1);
+
+						pyStr += ", " + uitous(s2) + ", " + uitous(s2 + sizeDiff) + ')';
 					}
 				}
 				else
@@ -575,24 +582,22 @@ int main(int argc, char* argv[])
 					tempStr = uitous(disIndex(rd4));
 					pyStr += tempStr;
 				}
+				pyStr += '\n';
 				syntax2Str = tempStr;
 
-				if (!(opStr.compare("*") || opStr.compare("/") || opStr.compare("%") || opStr.compare("+") || (opStr.compare("-"))))
+				if (!(opStr.compare("*") && opStr.compare("/") && opStr.compare("%") && opStr.compare("+") && (opStr.compare("-"))))
 				{
-					pyStr += "\nprint(";
+					pyStr += "print(";
+					if (!opStr.compare("-") || !opStr.compare("-="))
+						pyStr += "abs(";
+					pyStr += 'a';
 					if (flags[3])
 					{
-						if (!opStr.compare("-") || !opStr.compare("-="))
-							pyStr += "abs(";
-						pyStr += 'a';
 						syntaxStr += '(' + syntax1Str;
 						syntaxStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
 					}
 					else
-					{
 						syntaxStr += syntax1Str;
-						pyStr += 'a';
-					}
 					pyStr += ' ' + opStr + ' ';
 					syntaxStr += ' ' + opStr + ' ';
 					pyStr += "b";
@@ -611,15 +616,35 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					
+					pyStr += "a " + opStr + " b\n";
+					pyStr += "print(";
+					if(flags[3])
+					{
+						pyStr += "randomIndicesDecode(encode(";
+						syntaxStr += '(' + syntax1Str;
+						syntaxStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
+					}
+					else
+						syntaxStr += syntax1Str;
+					if (!opStr.compare("-") || !opStr.compare("-="))
+						pyStr += "abs(";
+					pyStr += 'a';
+					syntaxStr += ' ' + opStr + ' ';
+					if (flags[3])
+					{
+						pyStr += ')';
+						pyStr += ", 0, " + uitous(e1 - s1) + ')';
+						syntaxStr += '(' + syntax2Str;
+						syntaxStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+					}
+					else
+						syntaxStr += syntax2Str;
 				}
-
 				if (!opStr.compare("-") || !opStr.compare("-="))
 					pyStr += ')';
 				pyStr += ")\n";
 				if (i < syntaxNum - 1)
 					syntaxStr += '\n';
-
 				oFilePy.write(pyStr.c_str(), pyStr.size());
 				oFileTxt.write(syntaxStr.c_str(), syntaxStr.size());
 
