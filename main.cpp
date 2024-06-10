@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 	unsigned int	start = 0, end = -1;
 	size_t	sizeDiff;
 	string	opStr = "*";
-	bool	flags[4] = {false, false, false, false}; // array by value, sameLength, unsigned, random indices
+	bool	flags[5] = {false, false, false, false, false}; // array by value, sameLength, unsigned, random indices, zeros
 	char	flagChar = 'n';
 
 	if (argc == 1)
@@ -203,19 +203,22 @@ int main(int argc, char* argv[])
 		}
 		cout << "Array by array or Array by variable? (a/v) : ";
 		cin >> flagChar;
-		flags[0] = (flagChar == 'a') ? true : false;
+		flags[0] = flagChar == 'a' ? true : false;
 		if(flags[0])
 		{
 			cout << "Make the first and second value the same length? (y/n) : ";
 			cin >> flagChar;
-			flags[1] = (flagChar == 'y') ? true : false;
+			flags[1] = flagChar == 'y' ? true : false;
 		}
 		cout << "Signed value? (y/n) : ";
 		cin >> flagChar;
-		flags[2] = (flagChar == 'y') ? true : false;
+		flags[2] = flagChar == 'y' ? true : false;
 		cout << "Random range? (y/n) : ";
 		cin >> flagChar;
-		flags[3] = (flagChar == 'y') ? true : false;
+		flags[3] = flagChar == 'y' ? true : false;
+		cout << "Generate leading zeros? (y/n) : ";
+		cin >> flagChar;
+		flags[4] = flagChar == 'y' ? true : false;
 		if(flags[0])
 		{
 			cout << "Input the first minimum digit : ";
@@ -320,7 +323,7 @@ int main(int argc, char* argv[])
 	int	index = 1;
 
 	random_device	rd1, rd2, rd3, rd4;
-	mt19937	gen1(rd1()), gen2(rd2()), gen3(rd3());
+	mt19937	gen1(rd1()), gen2(rd2()), gen3(rd3()), gen4(rd4());
 	uniform_int_distribution<int>	disRange1(operand1MinDigitNum, operand1MaxDigitNum), disRange2(operand2MinDigitNum, operand2MaxDigitNum);
 	uniform_int_distribution<int> disVal(0, 9), disSign(0, 1);
 	uniform_int_distribution<unsigned int>	disIndex(0U, -1);
@@ -497,7 +500,10 @@ int main(int argc, char* argv[])
 				string syntaxStr, syntax1Str, syntax2Str;
 				string tempStr;
 
+				int j = 0;
 				int	maxJA = disRange1(gen1);
+				int maxZeroA;
+				uniform_int_distribution<unsigned int>	disZero1(0U, maxJA / 3);
 				int	tempVal = disVal(gen2);
 				bool	isNegative = false;
 
@@ -521,9 +527,16 @@ int main(int argc, char* argv[])
 					uniform_int_distribution<unsigned int> disEndIndex(s1, end);
 					e1 = disEndIndex(rd4);
 				}
+				
 				while (tempVal == 0)
 					tempVal = disVal(gen2);
-				for (int j = 0; j < maxJA; j++)
+				if(flags[4])
+				{
+					maxZeroA = disZero1(gen4);
+					for(; j < maxZeroA; j++)
+						syntax1Str += '0';
+				}
+				for (; j < maxJA; j++)
 				{
 					tempStr += tempVal + '0';
 					tempVal = disVal(gen2);
@@ -534,11 +547,15 @@ int main(int argc, char* argv[])
 					pyStr += ')';
 					pyStr += ", " + uitous(s1) + ", " + uitous(e1) + ')';
 				}
-				syntax1Str = tempStr;
+				
+				syntax1Str += tempStr;
 
 				pyStr += "\nb = ";
 
+				j = 0;
 				int	maxJB = disRange1(gen1);
+				int maxZeroB;
+				uniform_int_distribution<unsigned int>	disZero2(0U, maxJB / 3);
 				tempStr = "";
 				tempVal = disVal(gen2);
 				if(flags[2])
@@ -552,6 +569,12 @@ int main(int argc, char* argv[])
 				}
 				if (flags[0])
 				{
+					if(flags[4])
+					{
+						maxZeroB = disZero2(gen4);
+						for(; j < maxZeroB; j++)
+							syntax2Str += '0';
+					}
 					while (tempVal == 0)
 						tempVal = disVal(gen2);
 					for (int j = 0; j < maxJB; j++)
@@ -564,17 +587,30 @@ int main(int argc, char* argv[])
 					{
 						pyStr += ')';
 						size = log2(10.0) * (maxJB - 1);
+						//if(!(opStr.compare("*") && opStr.compare("/") && opStr.compare("%") && opStr.compare("+") && opStr.compare("-")))
+						//{
+							uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
 
-						uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= e1 ? e1 : (unsigned int)size >> 5);
+							s2 = disStartIndex(rd4);
 
-						s2 = disStartIndex(rd4);
+							uniform_int_distribution<unsigned int>	disEndIndex(s2, end);
+							e2 = disEndIndex(rd4);
 
-						uniform_int_distribution<unsigned int> disEndIndex(s2, end);
-						e2 = disEndIndex(rd4);
+							pyStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
+						/*}
+						else
+						{
+							uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= e1 ? e1 : (unsigned int)size >> 5);
 
-						sizeDiff = min(e2 - s2, e1 - s1);
+							s2 = disStartIndex(rd4);
 
-						pyStr += ", " + uitous(s2) + ", " + uitous(s2 + sizeDiff) + ')';
+							uniform_int_distribution<unsigned int> disEndIndex(s2, end);
+							e2 = disEndIndex(rd4);
+
+							sizeDiff = min(e2 - s2, e1 - s1);
+
+							pyStr += ", " + uitous(s2) + ", " + uitous(s2 + sizeDiff) + ')';
+						}*/
 					}
 				}
 				else
@@ -583,12 +619,12 @@ int main(int argc, char* argv[])
 					pyStr += tempStr;
 				}
 				pyStr += '\n';
-				syntax2Str = tempStr;
+				syntax2Str += tempStr;
 
 				if (!(opStr.compare("*") && opStr.compare("/") && opStr.compare("%") && opStr.compare("+") && (opStr.compare("-"))))
 				{
 					pyStr += "print(";
-					if (!opStr.compare("-") || !opStr.compare("-="))
+					if (!opStr.compare("-"))
 						pyStr += "abs(";
 					pyStr += 'a';
 					if (flags[3])
@@ -600,7 +636,9 @@ int main(int argc, char* argv[])
 						syntaxStr += syntax1Str;
 					pyStr += ' ' + opStr + ' ';
 					syntaxStr += ' ' + opStr + ' ';
-					pyStr += "b";
+					pyStr += 'b';
+					if (!opStr.compare("-"))
+						pyStr += ')';
 					if (flags[0])
 					{
 						if (flags[3])
@@ -626,7 +664,7 @@ int main(int argc, char* argv[])
 					}
 					else
 						syntaxStr += syntax1Str;
-					if (!opStr.compare("-") || !opStr.compare("-="))
+					if (!opStr.compare("-="))
 						pyStr += "abs(";
 					pyStr += 'a';
 					syntaxStr += ' ' + opStr + ' ';
@@ -639,9 +677,9 @@ int main(int argc, char* argv[])
 					}
 					else
 						syntaxStr += syntax2Str;
+					if (!opStr.compare("-="))
+						pyStr += ')';
 				}
-				if (!opStr.compare("-") || !opStr.compare("-="))
-					pyStr += ')';
 				pyStr += ")\n";
 				if (i < syntaxNum - 1)
 					syntaxStr += '\n';
