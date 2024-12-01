@@ -355,8 +355,8 @@ int main(int argc, char* argv[])
 	{
 		oFilePy.write(encodeStr.c_str(), encodeStr.size());
 		oFilePy.write(randomIndicesDecodeStr.c_str(), randomIndicesDecodeStr.size());
-		if (!flags[0])
-			oFileTxt.write("v\n", 2);
+		/* if (!flags[0])
+			oFileTxt.write("v\n", 2);*/
 		/*if (!(opStr.compare("*") || opStr.compare("/") || opStr.compare("%") || opStr.compare("+") || opStr.compare("-")))
 		{
 			for (int i = 0; i < syntaxNum; i++)
@@ -494,6 +494,13 @@ int main(int argc, char* argv[])
 		}
 		else*/
 		//{
+			if(flags[3])
+			{
+				start = log2(10.0) * start;
+				end = log2(10.0) * end;
+				start >>= 5;
+				end >>= 5;
+			}
 			for(int i = 0; i < syntaxNum; i++)
 			{
 				string pyStr = "a = ";
@@ -519,7 +526,7 @@ int main(int argc, char* argv[])
 					pyStr += "randomIndicesDecode(encode(";
 
 					size = log2(10.0) * (maxJA - 1);
-
+		
 					uniform_int_distribution<unsigned int> disStartIndex(start, (unsigned int)size >> 5 >= end ? end : (unsigned int)size >> 5);
 
 					s1 = disStartIndex(rd4);
@@ -553,7 +560,7 @@ int main(int argc, char* argv[])
 				pyStr += "\nb = ";
 
 				j = 0;
-				int	maxJB = disRange1(gen1);
+				int	maxJB = disRange2(gen1);
 				int maxZeroB;
 				uniform_int_distribution<unsigned int>	disZero2(0U, maxJB / 3);
 				tempStr = "";
@@ -594,6 +601,7 @@ int main(int argc, char* argv[])
 							s2 = disStartIndex(rd4);
 
 							uniform_int_distribution<unsigned int>	disEndIndex(s2, end);
+							
 							e2 = disEndIndex(rd4);
 
 							pyStr += ", " + uitous(s2) + ", " + uitous(e2) + ')';
@@ -634,7 +642,10 @@ int main(int argc, char* argv[])
 					}
 					else
 						syntaxStr += syntax1Str;
-					pyStr += ' ' + opStr + ' ';
+					pyStr += ' ' + opStr;
+					if(!opStr.compare("/"))
+						pyStr += '/';
+					pyStr += + ' ';
 					syntaxStr += ' ' + opStr + ' ';
 					pyStr += 'b';
 					if (!opStr.compare("-"))
@@ -666,7 +677,7 @@ int main(int argc, char* argv[])
 						syntaxStr += syntax1Str;
 					if (!opStr.compare("-="))
 						pyStr += "abs(";
-					pyStr += 'a';
+					pyStr += "a)";
 					syntaxStr += ' ' + opStr + ' ';
 					if (flags[3])
 					{
@@ -677,8 +688,6 @@ int main(int argc, char* argv[])
 					}
 					else
 						syntaxStr += syntax2Str;
-					if (!opStr.compare("-="))
-						pyStr += ')';
 				}
 				pyStr += ")\n";
 				if (i < syntaxNum - 1)
